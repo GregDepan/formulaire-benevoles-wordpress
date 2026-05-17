@@ -509,6 +509,25 @@ class FB_Admin {
         echo '<tr><th><label for="edit_description">Description</label></th>';
         echo '<td><textarea name="fb_description" id="edit_description" rows="6" style="width: 100%; max-width: 600px;">' . ($is_new ? '' : esc_textarea($event->post_content)) . '</textarea></td></tr>';
         
+        // Email customization fields
+        echo '<tr><th colspan="2" style="padding-top: 30px;"><hr style="border: 0; border-top: 2px solid #2271b1; margin: 20px 0;"></th></tr>';
+        echo '<tr><th colspan="2"><h3 style="margin: 0;">📧 Email de confirmation</h3>';
+        echo '<p class="description" style="margin: 10px 0;">Personnalisez le message envoyé aux bénévoles. Laissez vide pour utiliser le message par défaut.</p></th></tr>';
+        
+        $email_subject = get_post_meta($event_id, '_fb_email_subject', true);
+        $email_content = get_post_meta($event_id, '_fb_email_content', true);
+        $email_signature = get_post_meta($event_id, '_fb_email_signature', true);
+        
+        echo '<tr><th><label for="fb_email_subject">Objet de l\'email</label></th>';
+        echo '<td><input type="text" name="fb_email_subject" id="fb_email_subject" value="' . esc_attr($email_subject) . '" class="regular-text" placeholder="Confirmation de votre inscription - Kermesse"></td></tr>';
+        
+        echo '<tr><th><label for="fb_email_content">Message de remerciement</label></th>';
+        echo '<td><textarea name="fb_email_content" id="fb_email_content" rows="4" class="large-text" placeholder="Merci beaucoup pour votre inscription ! Votre aide nous est précieuse.">' . esc_textarea($email_content) . '</textarea>';
+        echo '<p class="description">Variables disponibles : {prenom}, {nom}, {event_name}</p></td></tr>';
+        
+        echo '<tr><th><label for="fb_email_signature">Signature</label></th>';
+        echo '<td><input type="text" name="fb_email_signature" id="fb_email_signature" value="' . esc_attr($email_signature) . '" class="regular-text" placeholder="L\'équipe Dépanordi Bordeaux"></td></tr>';
+        
         echo '</table>';
         
         echo '<p class="submit">';
@@ -544,6 +563,11 @@ class FB_Admin {
         $date_limite = isset($_POST['fb_date_limite']) && !empty($_POST['fb_date_limite']) ? sanitize_text_field($_POST['fb_date_limite']) : null;
         $description = sanitize_textarea_field($_POST['fb_description']);
         
+        // Email customization fields
+        $email_subject = isset($_POST['fb_email_subject']) ? sanitize_text_field($_POST['fb_email_subject']) : '';
+        $email_content = isset($_POST['fb_email_content']) ? sanitize_textarea_field($_POST['fb_email_content']) : '';
+        $email_signature = isset($_POST['fb_email_signature']) ? sanitize_text_field($_POST['fb_email_signature']) : '';
+        
         $event_id = isset($_POST['fb_event_id']) ? intval($_POST['fb_event_id']) : 0;
         
         if ($event_id) {
@@ -565,6 +589,25 @@ class FB_Admin {
                 update_post_meta($event_id, '_fb_date_limite', $date_limite);
             } else {
                 delete_post_meta($event_id, '_fb_date_limite');
+            }
+            
+            // Save email fields
+            if ($email_subject) {
+                update_post_meta($event_id, '_fb_email_subject', $email_subject);
+            } else {
+                delete_post_meta($event_id, '_fb_email_subject');
+            }
+            
+            if ($email_content) {
+                update_post_meta($event_id, '_fb_email_content', $email_content);
+            } else {
+                delete_post_meta($event_id, '_fb_email_content');
+            }
+            
+            if ($email_signature) {
+                update_post_meta($event_id, '_fb_email_signature', $email_signature);
+            } else {
+                delete_post_meta($event_id, '_fb_email_signature');
             }
             
             add_action('admin_notices', function() use ($title) {
