@@ -35,6 +35,33 @@ if (!defined('ABSPATH')) exit;
     <p>
         <label for="fb_description"><strong>Description</strong></label><br>
         <textarea name="fb_description" id="fb_description" rows="4" class="large-text"><?php echo esc_textarea($description); ?></textarea>
+        <span class="description">Cette description apparaît sur le formulaire public</span>
+    </p>
+    
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+    
+    <h3>📧 Email de confirmation</h3>
+    <p class="description">Personnalisez le message envoyé aux bénévoles après leur inscription. Laissez vide pour utiliser le message par défaut.</p>
+    
+    <p>
+        <label for="fb_email_subject"><strong>Objet de l'email</strong></label><br>
+        <input type="text" name="fb_email_subject" id="fb_email_subject" 
+               value="<?php echo esc_attr($email_subject); ?>" class="regular-input" 
+               placeholder="Confirmation de votre inscription - Kermesse">
+    </p>
+    
+    <p>
+        <label for="fb_email_content"><strong>Message de remerciement</strong></label><br>
+        <textarea name="fb_email_content" id="fb_email_content" rows="5" class="large-text" 
+                  placeholder="Merci beaucoup pour votre inscription à notre événement ! Votre aide nous est précieuse."><?php echo esc_textarea($email_content); ?></textarea>
+        <span class="description">Ce message apparaît au-dessus du récapitulatif des créneaux. Variables disponibles : {prenom}, {nom}, {event_name}</span>
+    </p>
+    
+    <p>
+        <label for="fb_email_signature"><strong>Signature</strong></label><br>
+        <input type="text" name="fb_email_signature" id="fb_email_signature" 
+               value="<?php echo esc_attr($email_signature); ?>" class="regular-input" 
+               placeholder="L'équipe Dépanordi Bordeaux">
     </p>
     
     <p>

@@ -936,6 +936,11 @@ class FB_Admin {
         $description = get_post_meta($post->ID, '_fb_description', true);
         $archived = get_post_meta($post->ID, '_fb_archived', true);
         
+        // Email customization fields
+        $email_subject = get_post_meta($post->ID, '_fb_email_subject', true);
+        $email_content = get_post_meta($post->ID, '_fb_email_content', true);
+        $email_signature = get_post_meta($post->ID, '_fb_email_signature', true);
+        
         include FB_PLUGIN_DIR . 'admin/partials/meta-boxes/event-details.php';
     }
     
@@ -1037,6 +1042,15 @@ class FB_Admin {
         }
         if (isset($_POST['fb_description'])) {
             update_post_meta($post_id, '_fb_description', sanitize_textarea_field($_POST['fb_description']));
+        }
+        if (isset($_POST['fb_email_subject'])) {
+            update_post_meta($post_id, '_fb_email_subject', sanitize_text_field($_POST['fb_email_subject']));
+        }
+        if (isset($_POST['fb_email_content'])) {
+            update_post_meta($post_id, '_fb_email_content', sanitize_textarea_field($_POST['fb_email_content']));
+        }
+        if (isset($_POST['fb_email_signature'])) {
+            update_post_meta($post_id, '_fb_email_signature', sanitize_text_field($_POST['fb_email_signature']));
         }
         if (isset($_POST['fb_archived'])) {
             update_post_meta($post_id, '_fb_archived', 1);

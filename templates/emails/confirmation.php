@@ -4,6 +4,13 @@
  */
 
 if (!defined('ABSPATH')) exit;
+
+// Extract email data
+$data = $email_data['data'];
+$slots_summary = $email_data['slots_summary'];
+$event_name = $email_data['event_name'];
+$custom_content = $email_data['custom_content'];
+$custom_signature = $email_data['custom_signature'];
 ?>
 <!DOCTYPE html>
 <html>
@@ -23,6 +30,7 @@ if (!defined('ABSPATH')) exit;
         .footer { background: #f4f4f4; text-align: center; padding: 20px; color: #666; font-size: 12px; }
         h2 { color: #d32f2f; margin-top: 0; }
         .thank-you { font-size: 18px; color: #2e7d32; margin-bottom: 20px; }
+        .custom-message { background: #fff9c4; padding: 15px; border-radius: 6px; border-left: 4px solid #fbc02d; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -33,7 +41,21 @@ if (!defined('ABSPATH')) exit;
         <div class="content">
             <p class="thank-you">Bonjour <?php echo esc_html($data['prenom'] . ' ' . $data['nom']); ?>,</p>
             
-            <p>Merci beaucoup pour votre inscription à <strong><?php echo esc_html($event_name); ?></strong> ! 🙏</p>
+            <?php if (!empty($custom_content)) : ?>
+                <div class="custom-message">
+                    <?php 
+                    // Replace variables in custom content
+                    $message = str_replace(
+                        array('{prenom}', '{nom}', '{event_name}'),
+                        array(esc_html($data['prenom']), esc_html($data['nom']), esc_html($event_name)),
+                        esc_html($custom_content)
+                    );
+                    echo nl2br($message);
+                    ?>
+                </div>
+            <?php else: ?>
+                <p>Merci beaucoup pour votre inscription à <strong><?php echo esc_html($event_name); ?></strong> ! 🙏</p>
+            <?php endif; ?>
             
             <p>Voici le récapitulatif de vos créneaux :</p>
             
@@ -54,7 +76,7 @@ if (!defined('ABSPATH')) exit;
             
             <p style="margin-top: 25px;">
                 À très bientôt !<br>
-                <strong>L'équipe Dépanordi Bordeaux</strong>
+                <strong><?php echo !empty($custom_signature) ? esc_html($custom_signature) : 'L\'équipe Dépanordi Bordeaux'; ?></strong>
             </p>
         </div>
         <div class="footer">

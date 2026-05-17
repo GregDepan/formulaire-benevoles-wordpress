@@ -10,10 +10,18 @@ class FB_Emails {
      */
     public function send_confirmation($data, $results) {
         $to = $data['email'];
-        $subject = 'Confirmation de votre inscription - Kermesse';
         
-        // Get event name
-        $event_name = get_the_title($data['event_id']);
+        // Get event-specific email settings or use defaults
+        $event_id = $data['event_id'];
+        $event_name = get_the_title($event_id);
+        
+        // Custom subject or default
+        $custom_subject = get_post_meta($event_id, '_fb_email_subject', true);
+        $subject = !empty($custom_subject) ? $custom_subject : 'Confirmation de votre inscription - ' . $event_name;
+        
+        // Custom content or default
+        $custom_content = get_post_meta($event_id, '_fb_email_content', true);
+        $custom_signature = get_post_meta($event_id, '_fb_email_signature', true);
         
         $headers = array(
             'Content-Type: text/html; charset=UTF-8',
@@ -31,6 +39,15 @@ class FB_Emails {
                 'rank' => isset($result['rank']) ? $result['rank'] : null,
             );
         }
+        
+        // Pass custom fields to template
+        $email_data = array(
+            'data' => $data,
+            'slots_summary' => $slots_summary,
+            'event_name' => $event_name,
+            'custom_content' => $custom_content,
+            'custom_signature' => $custom_signature,
+        );
         
         ob_start();
         include FB_PLUGIN_DIR . 'templates/emails/confirmation.php';
