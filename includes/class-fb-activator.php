@@ -40,7 +40,7 @@ class FB_Activator {
             statut varchar(20) NOT NULL DEFAULT 'confirmed',
             token varchar(64) NOT NULL,
             PRIMARY KEY  (id),
-            UNIQUE KEY email_evenement (email, evenement_id),
+            UNIQUE KEY email_event_creneau (email, evenement_id, creneau_id),
             KEY evenement_id (evenement_id),
             KEY stand_id (stand_id),
             KEY creneau_id (creneau_id),
