@@ -141,6 +141,7 @@ function run_formulaire_benevoles() {
     $plugin->get_loader()->run();
     
     // Auto-fix database constraint on every load (idempotent, runs once if needed)
+    require_once FB_PLUGIN_DIR . 'includes/class-fb-activator.php';
     FB_Activator::fix_unique_constraint();
 }
 add_action('plugins_loaded', 'run_formulaire_benevoles');
