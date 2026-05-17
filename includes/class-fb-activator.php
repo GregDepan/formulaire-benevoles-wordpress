@@ -42,7 +42,11 @@ class FB_Activator {
             return;
         }
         
-        $create_sql = $show_create->Create_Table;
+        // Get the CREATE TABLE statement (column name has a space)
+        $create_sql = isset($show_create->{'Create Table'}) ? $show_create->{'Create Table'} : '';
+        if (empty($create_sql)) {
+            return;
+        }
         
         // Check if old (buggy) constraint exists
         if (strpos($create_sql, 'UNIQUE KEY `email_evenement`') !== false || 
