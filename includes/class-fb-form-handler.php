@@ -185,6 +185,7 @@ class FB_Form_Handler {
         $table = $wpdb->prefix . 'fb_inscriptions';
         $success_count = 0;
         $errors = array();
+        $results = array();
         
         foreach ($data['creneaux'] as $creneau_id) {
             $creneau = get_post($creneau_id);
@@ -208,6 +209,13 @@ class FB_Form_Handler {
             
             if ($result) {
                 $success_count++;
+                // Build result array for email
+                $results[] = array(
+                    'success' => true,
+                    'stand_name' => get_the_title($stand_id),
+                    'creneau_title' => get_the_title($creneau_id),
+                    'waitlist' => false,
+                );
                 error_log('FB Form Submit - Inscription created: ' . $wpdb->insert_id);
             } else {
                 error_log('FB Form Submit - Insert failed: ' . $wpdb->last_error);
@@ -218,6 +226,9 @@ class FB_Form_Handler {
         error_log('FB Form Submit - Success count: ' . $success_count . ', Errors: ' . implode(', ', $errors));
         
         if ($success_count > 0) {
+            // Send confirmation email
+            $this->send_confirmation_email($data, $results);
+            
             // Redirect with success
             $redirect_url = add_query_arg('success', '1', get_permalink($data['event_id']));
             wp_redirect($redirect_url);

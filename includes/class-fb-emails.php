@@ -10,12 +10,27 @@ class FB_Emails {
      */
     public function send_confirmation($data, $results) {
         $to = $data['email'];
-        $subject = 'Confirmation de votre inscription - Formulaire Bénévoles';
+        $subject = 'Confirmation de votre inscription - Kermesse';
+        
+        // Get event name
+        $event_name = get_the_title($data['event_id']);
         
         $headers = array(
             'Content-Type: text/html; charset=UTF-8',
-            'From: ' . get_option('fb_email_from_name', 'Formulaire Bénévoles') . ' <' . get_option('admin_email', '') . '>',
+            'From: ' . get_option('fb_email_from_name', 'Dépanordi Bordeaux') . ' <' . get_option('admin_email', '') . '>',
+            'Reply-To: ' . get_option('admin_email', ''),
         );
+        
+        // Build slots summary
+        $slots_summary = array();
+        foreach ($results as $result) {
+            $slots_summary[] = array(
+                'stand_name' => $result['stand_name'],
+                'creneau_title' => $result['creneau_title'],
+                'waitlist' => isset($result['waitlist']) && $result['waitlist'],
+                'rank' => isset($result['rank']) ? $result['rank'] : null,
+            );
+        }
         
         ob_start();
         include FB_PLUGIN_DIR . 'templates/emails/confirmation.php';
