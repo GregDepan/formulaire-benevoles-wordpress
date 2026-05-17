@@ -9,6 +9,9 @@ if (!defined('ABSPATH')) exit;
 $data = $email_data['data'];
 $slots_summary = $email_data['slots_summary'];
 $event_name = $email_data['event_name'];
+$event_date = $email_data['event_date'];
+$date_limite = $email_data['date_limite'];
+$creneaux_summary = $email_data['creneaux_summary'];
 $custom_content = $email_data['custom_content'];
 $custom_signature = $email_data['custom_signature'];
 ?>
@@ -46,8 +49,15 @@ $custom_signature = $email_data['custom_signature'];
                     <?php 
                     // Replace variables in custom content
                     $message = str_replace(
-                        array('{prenom}', '{nom}', '{event_name}'),
-                        array(esc_html($data['prenom']), esc_html($data['nom']), esc_html($event_name)),
+                        array('{prenom}', '{nom}', '{event_name}', '{date_event}', '{date_limite}', '{creneaux_summary}'),
+                        array(
+                            esc_html($data['prenom']), 
+                            esc_html($data['nom']), 
+                            esc_html($event_name),
+                            esc_html($event_date),
+                            esc_html($date_limite),
+                            esc_html($creneaux_summary)
+                        ),
                         esc_html($custom_content)
                     );
                     echo nl2br($message);
@@ -56,6 +66,13 @@ $custom_signature = $email_data['custom_signature'];
             <?php else: ?>
                 <p>Merci beaucoup pour votre inscription à <strong><?php echo esc_html($event_name); ?></strong> ! 🙏</p>
             <?php endif; ?>
+            
+            <!-- Event details box -->
+            <div style="margin: 25px 0; padding: 15px; background: #e3f2fd; border-radius: 6px; border-left: 4px solid #2196f3;">
+                <strong>📅 Détails de l'événement :</strong><br>
+                <strong>Date :</strong> <?php echo esc_html($event_date); ?><br>
+                <strong>Date limite d'inscription :</strong> <?php echo esc_html($date_limite); ?>
+            </div>
             
             <p>Voici le récapitulatif de vos créneaux :</p>
             

@@ -523,7 +523,7 @@ class FB_Admin {
         
         echo '<tr><th><label for="fb_email_content">Message de remerciement</label></th>';
         echo '<td><textarea name="fb_email_content" id="fb_email_content" rows="4" class="large-text" placeholder="Merci beaucoup pour votre inscription ! Votre aide nous est précieuse.">' . esc_textarea($email_content) . '</textarea>';
-        echo '<p class="description">Variables disponibles : {prenom}, {nom}, {event_name}</p></td></tr>';
+        echo '<p class="description">Variables disponibles : {prenom}, {nom}, {event_name}, {date_event}, {date_limite}, {creneaux_summary}</p></td></tr>';
         
         echo '<tr><th><label for="fb_email_signature">Signature</label></th>';
         echo '<td><input type="text" name="fb_email_signature" id="fb_email_signature" value="' . esc_attr($email_signature) . '" class="regular-text" placeholder="L\'équipe Dépanordi Bordeaux"></td></tr>';

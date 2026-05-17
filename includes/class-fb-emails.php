@@ -15,6 +15,24 @@ class FB_Emails {
         $event_id = $data['event_id'];
         $event_name = get_the_title($event_id);
         
+        // Get event dates
+        $event_date = get_post_meta($event_id, '_fb_date_debut', true);
+        if (empty($event_date)) {
+            $event_date = get_post_field('post_date', $event_id);
+        }
+        $date_limite = get_post_meta($event_id, '_fb_date_limite', true);
+        
+        // Format dates
+        $event_date_formatted = !empty($event_date) ? date_i18n('d/m/Y', strtotime($event_date)) : 'Non définie';
+        $date_limite_formatted = !empty($date_limite) ? date_i18n('d/m/Y', strtotime($date_limite)) : 'Non définie';
+        
+        // Build creneaux summary text
+        $creneaux_summary = array();
+        foreach ($results as $result) {
+            $creneaux_summary[] = $result['stand_name'] . ' - ' . $result['creneau_title'];
+        }
+        $creneaux_summary_text = implode("\n• ", $creneaux_summary);
+        
         // Custom subject or default
         $custom_subject = get_post_meta($event_id, '_fb_email_subject', true);
         $subject = !empty($custom_subject) ? $custom_subject : 'Confirmation de votre inscription - ' . $event_name;
@@ -45,6 +63,9 @@ class FB_Emails {
             'data' => $data,
             'slots_summary' => $slots_summary,
             'event_name' => $event_name,
+            'event_date' => $event_date_formatted,
+            'date_limite' => $date_limite_formatted,
+            'creneaux_summary' => $creneaux_summary_text,
             'custom_content' => $custom_content,
             'custom_signature' => $custom_signature,
         );
