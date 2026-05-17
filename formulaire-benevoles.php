@@ -138,7 +138,7 @@ class Formulaire_Benevoles {
 // Initialize on plugins_loaded
 function run_formulaire_benevoles() {
     $plugin = new Formulaire_Benevoles();
-    $plugin->run();
+    $plugin->get_loader()->run();
     
     // Auto-fix database constraint on every load (idempotent, runs once if needed)
     FB_Activator::fix_unique_constraint();
