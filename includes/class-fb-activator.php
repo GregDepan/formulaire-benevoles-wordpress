@@ -9,6 +9,9 @@ class FB_Activator {
         // Create custom database tables
         self::create_tables();
         
+        // Check and fix unique constraint if needed
+        self::fix_unique_constraint();
+        
         // Register custom post types (for rewrite rules flush)
         self::register_post_types();
         
@@ -17,6 +20,57 @@ class FB_Activator {
         
         // Set default options
         self::set_default_options();
+    }
+    
+    /**
+     * Auto-fix unique constraint on plugin load if incorrect
+     * This ensures existing installations get the fix without manual migration
+     */
+    public static function fix_unique_constraint() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'fb_inscriptions';
+        
+        // Check if table exists
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table'");
+        if (empty($table_exists)) {
+            return; // Table doesn't exist yet
+        }
+        
+        // Check current table structure
+        $show_create = $wpdb->get_row("SHOW CREATE TABLE $table");
+        if (empty($show_create)) {
+            return;
+        }
+        
+        $create_sql = $show_create->Create_Table;
+        
+        // Check if old (buggy) constraint exists
+        if (strpos($create_sql, 'UNIQUE KEY `email_evenement`') !== false || 
+            strpos($create_sql, 'UNIQUE KEY email_evenement') !== false) {
+            
+            error_log('FB Activator: Found old unique constraint, fixing...');
+            
+            // Drop old unique key
+            $wpdb->query("ALTER TABLE $table DROP INDEX `email_evenement`");
+            
+            if ($wpdb->last_error) {
+                error_log('FB Activator: Error dropping old key: ' . $wpdb->last_error);
+                return;
+            }
+            
+            // Add new correct unique key
+            $wpdb->query("ALTER TABLE $table ADD UNIQUE KEY `email_event_creneau` (`email`, `evenement_id`, `creneau_id`)");
+            
+            if ($wpdb->last_error) {
+                error_log('FB Activator: Error adding new key: ' . $wpdb->last_error);
+                return;
+            }
+            
+            error_log('FB Activator: Unique constraint fixed successfully!');
+            
+            // Set flag to show admin notice
+            update_option('fb_constraint_fixed', true);
+        }
     }
     
     private static function create_tables() {
