@@ -845,28 +845,93 @@ class FB_Admin {
      */
     private function send_cancellation_email($inscription) {
         $to = $inscription->email;
-        $subject = 'Votre inscription a été annulée';
         
-        $evenement_title = get_the_title($inscription->evenement_id);
+        // Get event-specific email settings
+        $event_id = $inscription->evenement_id;
+        $event_name = get_the_title($event_id);
+        
+        // Custom signature or default
+        $custom_signature = get_post_meta($event_id, '_fb_email_signature', true);
+        $signature = !empty($custom_signature) ? $custom_signature : "L'équipe Dépanordi Bordeaux";
+        
         $stand_title = get_the_title($inscription->stand_id);
         $creneau_title = get_the_title($inscription->creneau_id);
         
-        $message = sprintf(
-            "Bonjour %s %s,\n\n" .
-            "Votre inscription a été annulée.\n\n" .
-            "Événement : %s\n" .
-            "Stand : %s\n" .
-            "Créneau : %s\n\n" .
-            "Cordialement,\n" .
-            "L'équipe Dépanordi",
-            $inscription->prenom,
-            $inscription->nom,
-            $evenement_title,
-            $stand_title,
-            $creneau_title
+        // Get event date
+        $event_date = get_post_meta($event_id, '_fb_date_debut', true);
+        if (empty($event_date)) {
+            $event_date = get_post_field('post_date', $event_id);
+        }
+        $event_date_formatted = !empty($event_date) ? date_i18n('d/m/Y', strtotime($event_date)) : 'Non définie';
+        
+        $headers = array(
+            'Content-Type: text/html; charset=UTF-8',
+            'From: ' . get_option('fb_email_from_name', 'Dépanordi Bordeaux') . ' <' . get_option('admin_email', '') . '>',
+            'Reply-To: ' . get_option('admin_email', ''),
         );
         
-        wp_mail($to, $subject, $message);
+        ob_start();
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f4f4f4; }
+                .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                .header { background: #d32f2f; color: white; padding: 30px 20px; text-align: center; }
+                .header h1 { margin: 0; font-size: 28px; }
+                .content { padding: 30px 20px; }
+                .info-box { background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 6px; border-left: 4px solid #ffc107; }
+                .details { background: #e3f2fd; padding: 15px; margin: 20px 0; border-radius: 6px; border-left: 4px solid #2196f3; }
+                .footer { background: #f4f4f4; text-align: center; padding: 20px; color: #666; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>ℹ️ Modification d'inscription</h1>
+                </div>
+                <div class="content">
+                    <p>Bonjour <?php echo esc_html($inscription->prenom . ' ' . $inscription->nom); ?>,</p>
+                    
+                    <div class="info-box">
+                        <strong>Votre inscription a été annulée par l'administrateur.</strong>
+                    </div>
+                    
+                    <div class="details">
+                        <strong>Détails de l'inscription annulée :</strong><br>
+                        📅 Événement : <?php echo esc_html($event_name); ?> (le <?php echo esc_html($event_date_formatted); ?>)<br>
+                        🏪 Stand : <?php echo esc_html($stand_title); ?><br>
+                        ⏰ Créneau : <?php echo esc_html($creneau_title); ?>
+                    </div>
+                    
+                    <?php if (get_post_meta($event_id, '_fb_allow_modifications', true)) : ?>
+                        <p style="margin-top: 25px; padding: 15px; background: #e8f5e9; border-radius: 6px; border-left: 4px solid #2e7d32;">
+                            <strong>💡 Bonne nouvelle !</strong><br>
+                            Vous pouvez vous réinscrire à un autre créneau si disponible.
+                            <?php if (get_post_meta($event_id, '_fb_date_limite', true)) : ?>
+                                <br>Inscriptions ouvertes jusqu'au <?php echo date_i18n('d/m/Y', strtotime(get_post_meta($event_id, '_fb_date_limite', true))); ?>.
+                            <?php endif; ?>
+                        </p>
+                    <?php endif; ?>
+                    
+                    <p style="margin-top: 25px;">
+                        Cordialement,<br>
+                        <strong><?php echo esc_html($signature); ?></strong>
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>Cet email a été envoyé automatiquement. Merci de ne pas y répondre.</p>
+                    <p>© <?php echo date('Y'); ?> Dépanordi Bordeaux</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        <?php
+        $message = ob_get_clean();
+        
+        wp_mail($to, 'Votre inscription a été modifiée - ' . $event_name, $message, $headers);
     }
     
     /**
