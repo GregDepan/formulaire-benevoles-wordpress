@@ -67,6 +67,26 @@ class FB_Public {
     }
     
     /**
+     * Allow public access to event pages even if site is private
+     * Must run BEFORE WordPress checks blog_public option
+     */
+    public function allow_public_event_access() {
+        // Check early if this is an event page
+        if (is_singular('fb_evenement')) {
+            global $post;
+            
+            // Only allow access to published events
+            if (!$post || $post->post_status !== 'publish') {
+                return;
+            }
+            
+            // Temporarily make site appear public for this request
+            // This bypasses WordPress privacy check without changing the actual option
+            add_filter('option_blog_public', '__return_true');
+        }
+    }
+    
+    /**
      * Register shortcodes
      */
     public function register_shortcodes() {

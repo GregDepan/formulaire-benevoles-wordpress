@@ -107,6 +107,10 @@ class Formulaire_Benevoles {
         // Template redirect for custom event pages
         $this->loader->add_action('template_include', $plugin_public, 'load_event_template');
         
+        // Allow public access to event pages even if site is private
+        // Priority 5 - must run before WordPress checks blog_public (default is 10)
+        $this->loader->add_action('template_redirect', $plugin_public, 'allow_public_event_access', 5);
+        
         // Shortcodes
         $this->loader->add_action('init', $plugin_public, 'register_shortcodes');
         
