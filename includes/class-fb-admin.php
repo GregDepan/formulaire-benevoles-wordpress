@@ -292,6 +292,11 @@ class FB_Admin {
             $this->handle_event_duplicate(intval($_GET['event_id']));
         }
         
+        // Handle event publication (change status from 'future' to 'publish')
+        if (isset($_GET['action']) && $_GET['action'] === 'publish' && isset($_GET['event_id'])) {
+            $this->handle_event_publish(intval($_GET['event_id']));
+        }
+        
         // Handle event creation/update
         if (isset($_POST['fb_create_event']) || isset($_POST['fb_update_event'])) {
             $this->handle_event_save();
@@ -401,6 +406,14 @@ class FB_Admin {
                     echo '<a href="' . admin_url('admin.php?page=fb-event-editor&event_id=' . $event->ID) . '" class="button button-primary" style="margin-bottom: 4px;">';
                     echo '<span class="dashicons dashicons-edit"></span> Éditer';
                     echo '</a> ';
+                    
+                    // Bouton Publier si l'événement est programmé (statut = future)
+                    if ($event->post_status === 'future') {
+                        echo '<a href="' . admin_url('admin.php?page=fb-dashboard&action=publish&event_id=' . $event->ID) . '" class="button button-primary" style="margin-bottom: 4px; background-color: #28a745; border-color: #28a745;">';
+                        echo '<span class="dashicons dashicons-yes"></span> Publier';
+                        echo '</a> ';
+                    }
+                    
                     echo '<a href="' . admin_url('admin.php?page=fb-dashboard&action=edit&event_id=' . $event->ID) . '" class="button button-secondary" style="margin-bottom: 4px;">';
                     echo '<span class="dashicons dashicons-admin-settings"></span> Détails';
                     echo '</a> ';
@@ -631,6 +644,34 @@ class FB_Admin {
                 echo '<div class="notice notice-success"><p>Événement <strong>' . esc_html($title) . '</strong> créé.</p></div>';
             });
         }
+    }
+    
+    /**
+     * Handle event publication (change status from 'future' to 'publish')
+     */
+    private function handle_event_publish($event_id) {
+        if (!current_user_can('manage_options')) {
+            wp_die('Non autorisé');
+        }
+        
+        $event = get_post($event_id);
+        if (!$event || $event->post_type !== 'fb_evenement') {
+            wp_die('Événement invalide');
+        }
+        
+        if ($event->post_status !== 'future') {
+            wp_die('Cet événement est déjà publié');
+        }
+        
+        // Publish the event
+        wp_update_post(array(
+            'ID' => $event_id,
+            'post_status' => 'publish'
+        ));
+        
+        add_action('admin_notices', function() use ($event) {
+            echo '<div class="notice notice-success"><p>✅ Événement "' . esc_html($event->post_title) . '" publié et accessible au public !</p></div>';
+        });
     }
     
     /**
