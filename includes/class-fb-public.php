@@ -68,7 +68,7 @@ class FB_Public {
     
     /**
      * Allow public access to event pages even if site is private
-     * Hooked on 'plugins_loaded' - earliest possible hook
+     * Hooked on 'parse_request' with priority 0 - before WordPress checks site visibility
      */
     public function allow_public_event_access() {
         // Check if this is an event page request - check $_GET directly for earliest detection
@@ -78,10 +78,27 @@ class FB_Public {
         
         if ($is_event_page) {
             // Make site appear public for this request
-            add_filter('option_blog_public', '__return_true');
+            add_filter('option_blog_public', '__return_true', 100);
             
-            // Also bypass any "force login" filters from other plugins/themes
+            // Remove any login redirects from WordPress core or other plugins
             remove_action('template_redirect', 'wp_redirect_admin_locations', 1000);
+            
+            // Force WordPress to treat this as a valid public request
+            add_action('wp', array($this, 'force_public_query'), 0);
+        }
+    }
+    
+    /**
+     * Force WordPress to recognize this as a valid public query
+     */
+    public function force_public_query($wp) {
+        global $wp_query;
+        
+        // If we're on an event page, ensure the query is marked as successful
+        if (isset($wp_query->query_vars['post_type']) && $wp_query->query_vars['post_type'] === 'fb_evenement') {
+            $wp_query->is_404 = false;
+            $wp_query->is_singular = true;
+            $wp_query->is_single = true;
         }
     }
     

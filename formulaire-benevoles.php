@@ -108,8 +108,8 @@ class Formulaire_Benevoles {
         $this->loader->add_action('template_include', $plugin_public, 'load_event_template');
         
         // Allow public access to event pages even if site is private
-        // Use 'plugins_loaded' - earliest possible hook, runs before any auth checks
-        $this->loader->add_action('plugins_loaded', $plugin_public, 'allow_public_event_access', 1);
+        // Use 'parse_request' with priority 0 - before WordPress checks site visibility
+        $this->loader->add_action('parse_request', $plugin_public, 'allow_public_event_access', 0);
         
         // Shortcodes
         $this->loader->add_action('init', $plugin_public, 'register_shortcodes');
