@@ -2,24 +2,11 @@
 /**
  * Single event template - public form
  * Reprend exactement la structure du formulaire Google
- * IMPORTANT: N'utilise PAS get_header()/get_footer() pour éviter les vérifications de connexion du thème
  */
 
 if (!defined('ABSPATH')) exit;
 
-// Minimal HTML header - bypass theme to avoid private site checks
-?>
-<!DOCTYPE html>
-<html <?php language_attributes(); ?>>
-<head>
-    <meta charset="<?php bloginfo('charset'); ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo esc_html(get_the_title()); ?> - Inscription Bénévoles</title>
-    <?php wp_head(); ?>
-</head>
-<body class="fb-template-body">
-
-<?php
+get_header();
 
 global $wpdb, $post;
 $evenement_id = $post->ID;
@@ -36,11 +23,7 @@ if ($archived) {
         </div>
     </div>
     <?php
-    // Minimal footer for archived page
-    ?>
-    </body>
-    </html>
-    <?php
+    get_footer();
     return;
 }
 
@@ -538,7 +521,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <?php
-// Minimal footer - bypass theme
-?>
-</body>
-</html>
+get_footer();
