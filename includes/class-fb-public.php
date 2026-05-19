@@ -68,22 +68,33 @@ class FB_Public {
     
     /**
      * Allow public access to event pages even if site is private
-     * Must run BEFORE WordPress checks blog_public option
+     * Hooked on 'plugins_loaded' - earliest possible hook
      */
     public function allow_public_event_access() {
-        // Check early if this is an event page
-        if (is_singular('fb_evenement')) {
-            global $post;
-            
-            // Only allow access to published events
-            if (!$post || $post->post_status !== 'publish') {
-                return;
-            }
-            
-            // Temporarily make site appear public for this request
-            // This bypasses WordPress privacy check without changing the actual option
+        // Check if this is an event page request - check $_GET directly for earliest detection
+        $is_event_page = isset($_GET['fb_evenement']) || 
+                         (isset($_GET['post_type']) && $_GET['post_type'] === 'fb_evenement') ||
+                         (isset($_GET['p']) && $this->is_event_post($_GET['p']));
+        
+        if ($is_event_page) {
+            // Make site appear public for this request
             add_filter('option_blog_public', '__return_true');
+            
+            // Also bypass any "force login" filters from other plugins/themes
+            remove_action('template_redirect', 'wp_redirect_admin_locations', 1000);
         }
+    }
+    
+    /**
+     * Check if a post ID is a published fb_evenement
+     */
+    private function is_event_post($post_id) {
+        global $wpdb;
+        $post = $wpdb->get_row($wpdb->prepare(
+            "SELECT post_status FROM {$wpdb->posts} WHERE ID = %d AND post_type = 'fb_evenement'",
+            $post_id
+        ));
+        return $post && $post->post_status === 'publish';
     }
     
     /**
