@@ -384,7 +384,7 @@ class FB_Admin {
                 echo '<th>Date</th>';
                 echo '<th>Date limite</th>';
                 echo '<th>Inscriptions</th>';
-                echo '<th style="width: 250px;">Actions</th>';
+                echo '<th style="width: 450px;">Actions</th>';
                 echo '</tr></thead>';
                 echo '<tbody>';
                 
