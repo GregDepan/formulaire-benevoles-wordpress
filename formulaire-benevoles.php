@@ -111,6 +111,10 @@ class Formulaire_Benevoles {
         // Use 'parse_request' with priority 0 - before WordPress checks site visibility
         $this->loader->add_action('parse_request', $plugin_public, 'allow_public_event_access', 0);
         
+        // Force HTTP 200 status for event pages - runs after WordPress decides the status
+        // Priority 100 ensures this runs after WordPress sets 404 status
+        $this->loader->add_action('template_redirect', $plugin_public, 'force_http_200', 100);
+        
         // Shortcodes
         $this->loader->add_action('init', $plugin_public, 'register_shortcodes');
         

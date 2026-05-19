@@ -103,6 +103,18 @@ class FB_Public {
     }
     
     /**
+     * Force HTTP 200 status for event pages - runs after WordPress decides the status
+     * This is the key fix: WordPress sets 404 status late in template_redirect
+     */
+    public function force_http_200() {
+        if (is_singular('fb_evenement')) {
+            status_header(200);
+            // Also remove any no-cache headers that might be set for private sites
+            header_remove('X-Robots-Tag');
+        }
+    }
+    
+    /**
      * Check if a post ID is a published fb_evenement
      */
     private function is_event_post($post_id) {
